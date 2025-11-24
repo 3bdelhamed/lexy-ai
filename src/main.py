@@ -101,7 +101,9 @@ async def health():
 
 
 # Vercel serverless handler
-handler = app
+# Export as 'app' for Vercel's @vercel/python runtime
+# The runtime will automatically wrap this ASGI application
+application = app
 
 
 if __name__ == "__main__":

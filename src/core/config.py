@@ -26,10 +26,21 @@ class Settings(BaseSettings):
         return int(self.max_file_size_mb * 1024 * 1024)
     
     model_config = SettingsConfigDict(
+        # .env file is optional - Vercel injects env vars directly
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=False
+        case_sensitive=False,
+        extra="ignore"  # Ignore extra env vars from Vercel runtime
     )
+    
+    def __init__(self, **kwargs):
+        """Initialize settings and validate required fields"""
+        super().__init__(**kwargs)
+        if not self.gemini_api_key:
+            raise ValueError(
+                "GEMINI_API_KEY environment variable is required. "
+                "Please set it in Vercel dashboard or .env file for local development."
+            )
 
 
 # Global settings instance
