@@ -1,3 +1,5 @@
+TEST_SUMMARY.md
+test_endpoints.py
 # Python
 __pycache__/
 *.py[cod]
