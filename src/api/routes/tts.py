@@ -29,7 +29,7 @@ async def generate_tts(
     Generate text-to-speech audio with word-level timestamps.
     
     - **text**: Text to convert to speech (1-10000 characters)
-    - **voice**: Voice to use (Puck, Chorus, Cora, Dan, Wave)
+    - **voice**: Voice to use (puck, charon [male], achernar, aoede [female])
     - **sample_rate**: Audio sample rate in Hz (default: 24000)
     
     Returns base64-encoded WAV audio with word-level timestamps.

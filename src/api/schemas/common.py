@@ -37,12 +37,13 @@ class ReplaceComplexWords(str, Enum):
 
 
 class TTSVoice(str, Enum):
-    """Available TTS voices"""
-    PUCK = "Puck"
-    CHORUS = "Chorus"
-    CORA = "Cora"
-    DAN = "Dan"
-    WAVE = "Wave"
+    """Available TTS voices (Google Chirp-3-HD/Gemini-TTS)"""
+    # Male voices
+    PUCK = "Puck"      # Upbeat, conversational, friendly, energetic
+    CHARON = "Charon"  # Deep, authoritative, informative, professional
+    # Female voices
+    ACHERNAR = "Achernar"  # Fast, energetic, soft
+    AOEDE = "Aoede"        # Smooth, clear
 
 
 class WordTimestamp(BaseModel):
