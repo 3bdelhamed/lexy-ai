@@ -22,7 +22,7 @@ A modern REST API built for Vercel that makes digital content accessible for peo
 - **In-Memory Audio Generation**: No file storage, fully serverless
 - **Base64-Encoded Output**: Direct JSON response with WAV audio
 - **Word-Level Timestamps**: Precise synchronization for highlighting
-- **5 Premium Voices**: Puck, Chorus, Cora, Dan, Wave
+- **4 Premium Voices**: 2 Male (puck, charon), 2 Female (achernar, aoede)
 
 ### 🚀 Serverless Architecture
 - **Vercel-Optimized**: 10-second timeout compliance
@@ -152,7 +152,7 @@ curl -X POST "http://localhost:8000/tts/generate" \
   -H "Content-Type: application/json" \
   -d '{
     "text": "Hello, world!",
-    "voice": "Puck",
+    "voice": "puck",
     "sample_rate": 24000
   }'
 ```
@@ -183,11 +183,13 @@ curl -X POST "http://localhost:8000/tts/generate" \
 
 ### Available Voices
 
-- **Puck**: Neutral, clear (default)
-- **Chorus**: Warm, friendly
-- **Cora**: Professional, calm
-- **Dan**: Authoritative, deep
-- **Wave**: Energetic, dynamic
+**Male Voices:**
+- **puck**: Upbeat, conversational, friendly, energetic (default)
+- **charon**: Deep, authoritative, informative, professional
+
+**Female Voices:**
+- **achernar**: Fast, energetic, soft
+- **aoede**: Smooth, clear
 
 ---
 

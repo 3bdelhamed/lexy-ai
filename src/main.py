@@ -22,7 +22,7 @@ from core.exceptions import (
     general_exception_handler
 )
 from core.middleware import LoggingMiddleware
-from api.routes import simplify_router, tts_router
+from api.routes import simplify_router, tts_router, larf_router
 from api.schemas import HealthResponse
 
 # Configure logging
@@ -63,6 +63,7 @@ app.add_exception_handler(Exception, general_exception_handler)
 # Include routers
 app.include_router(simplify_router)
 app.include_router(tts_router)
+app.include_router(larf_router)
 
 
 @app.get("/", response_model=dict)
