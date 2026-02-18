@@ -8,7 +8,9 @@ class Settings(BaseSettings):
     
     # Required
     gemini_api_key: str
-    
+    mistral_api_key: str = ""
+    groq_api_key: str = ""
+    groq_larf_model: str = "llama-3.3-70b-versatile"  # Default LARF model for Groq integration
     # Optional with defaults
     max_file_size_mb: float = 10.0
     cors_origins: str = "http://localhost:3000,http://localhost:8000"

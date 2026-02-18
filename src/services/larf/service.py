@@ -1,7 +1,6 @@
 import time
 import logging
-from google import genai
-from google.genai import types
+from groq import AsyncGroq  # Modern SDK import
 
 from core.config import settings
 from core.exceptions import LLMTimeoutException, ValidationException
@@ -10,48 +9,67 @@ from services.larf.prompts import get_larf_system_prompt
 logger = logging.getLogger(__name__)
 
 class LarfService:
-    """Service for LARF text annotation"""
+    """Service for LARF text annotation using Groq"""
     
     def __init__(self):
         self._client = None
     
     @property
     def client(self):
-        """Lazy load the Gemini client"""
+        """Lazy load the Groq client"""
         if self._client is None:
-            self._client = genai.Client(api_key=settings.gemini_api_key)
+            if not settings.groq_api_key:
+                raise ValidationException("GROQ_API_KEY is not set in configuration.")
+            
+            # Modern SDK initialization
+            self._client = AsyncGroq(api_key=settings.groq_api_key)
         return self._client
     
     async def annotate_text(self, text: str, custom_focus: str = None) -> tuple[str, float]:
         """
-        Annotate text with dyslexia-friendly HTML tags.
+        Annotate text with dyslexia-friendly HTML tags using Groq.
         Returns: (annotated_html, processing_time_ms)
         """
         start_time = time.time()
         
-        system_prompt = get_larf_system_prompt(custom_focus)
+        # Get the system prompt from your existing prompts file
+        system_content = get_larf_system_prompt(custom_focus)
         
         try:
-            logger.info("Sending LARF annotation request to Gemini")
+            logger.info(f"Sending LARF annotation request to Groq (Model: {settings.groq_larf_model})")
             
-            # Using flash model for speed as this is a formatting task
-            response = self.client.models.generate_content(
-                model='gemini-2.0-flash-lite',
-                contents=text,
-                config=types.GenerateContentConfig(
-                    system_instruction=system_prompt,
-                    temperature=0.0, # Zero temperature for consistent formatting
-                    max_output_tokens=8000
-                )
+            # Modern SDK: Use max_completion_tokens instead of max_tokens
+            chat_completion = await self.client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": system_content,
+                    },
+                    {
+                        "role": "user",
+                        "content": text,
+                    }
+                ],
+                model=settings.groq_larf_model,
+                temperature=0.0,
+                max_completion_tokens=8000,  # Modern SDK parameter name
+                stream=False,
             )
             
-            annotated_html = response.text.strip()
+            # Extract content
+            annotated_html = chat_completion.choices[0].message.content or ""
             
-            # Basic cleanup if model included markdown blocks despite instructions
+            # Handle empty response
+            if not annotated_html.strip():
+                raise ValidationException("Model returned empty response")
+            
+            # Clean up markdown code fences
+            annotated_html = annotated_html.strip()
             if annotated_html.startswith("```html"):
                 annotated_html = annotated_html[7:]
-            if annotated_html.startswith("```"):
+            elif annotated_html.startswith("```"):
                 annotated_html = annotated_html[3:]
+            
             if annotated_html.endswith("```"):
                 annotated_html = annotated_html[:-3]
                 
@@ -63,4 +81,4 @@ class LarfService:
             logger.error(f"LARF annotation failed: {str(e)}")
             if "timeout" in str(e).lower():
                 raise LLMTimeoutException()
-            raise ValidationException(f"Annotation failed: {str(e)}")
+            raise ValidationException(f"Groq Annotation failed: {str(e)}")
