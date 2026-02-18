@@ -8,3 +8,9 @@ pypdf2>=3.0.1
 python-docx>=1.1.0
 python-multipart>=0.0.9
 psutil>=5.9.0
+# PDF Hybrid Extractor Dependencies
+pymupdf>=1.23.0        # Required for 'import fitz'
+pdfplumber>=0.10.0     # Required for table detection
+Pillow>=10.0.0         # Required for image processing
+mistralai>=0.0.12      # Required for OCR
+groq>=1.0.0 

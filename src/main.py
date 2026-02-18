@@ -22,7 +22,7 @@ from core.exceptions import (
     general_exception_handler
 )
 from core.middleware import LoggingMiddleware
-from api.routes import simplify_router, tts_router, larf_router
+from api.routes import simplify_router, tts_router, larf_router, extract_router
 from api.schemas import HealthResponse
 
 # Configure logging
@@ -64,6 +64,7 @@ app.add_exception_handler(Exception, general_exception_handler)
 app.include_router(simplify_router)
 app.include_router(tts_router)
 app.include_router(larf_router)
+app.include_router(extract_router)
 
 
 @app.get("/", response_model=dict)
@@ -79,6 +80,7 @@ async def root():
             "docs": "/docs",
             "redoc": "/redoc",
             "health": "/health",
+            "extract_pdf": "/extract/pdf",
             "simplify_text": "/simplify/text",
             "simplify_file": "/simplify/file",
             "simplify_modes": "/simplify/modes",
