@@ -3,6 +3,7 @@ import logging
 from groq import AsyncGroq  # Modern SDK import
 
 from core.config import settings
+from core.cache import cache_service
 from core.exceptions import LLMTimeoutException, ValidationException
 from services.larf.prompts import get_larf_system_prompt
 
@@ -25,13 +26,30 @@ class LarfService:
             self._client = AsyncGroq(api_key=settings.groq_api_key)
         return self._client
     
-    async def annotate_text(self, text: str, custom_focus: str = None) -> tuple[str, float]:
+    async def annotate_text(
+        self,
+        text: str,
+        custom_focus: str = None,
+        use_cache: bool = True,
+    ) -> tuple[str, float]:
         """
         Annotate text with dyslexia-friendly HTML tags using Groq.
         Returns: (annotated_html, processing_time_ms)
         """
         start_time = time.time()
         
+        # ── Cache read ────────────────────────────────────────────────────────
+        cache_key = cache_service.make_key(
+            "larf", f"{text[:500]}:{custom_focus or ''}:{settings.groq_larf_model}"
+        )
+
+        if use_cache:
+            cached = await cache_service.get(cache_key)
+            if cached:
+                logger.info("Cache HIT for LARF annotation")
+                elapsed = (time.time() - start_time) * 1000
+                return cached["annotated_html"], elapsed
+                
         # Get the system prompt from your existing prompts file
         system_content = get_larf_system_prompt(custom_focus)
         
@@ -72,10 +90,14 @@ class LarfService:
             
             if annotated_html.endswith("```"):
                 annotated_html = annotated_html[:-3]
+            annotated_html = annotated_html.strip()
+            
+            # ── Cache write ───────────────────────────────────────────────────
+            await cache_service.set(cache_key, {"annotated_html": annotated_html})
                 
             processing_time_ms = (time.time() - start_time) * 1000
             
-            return annotated_html.strip(), processing_time_ms
+            return annotated_html, processing_time_ms
 
         except Exception as e:
             logger.error(f"LARF annotation failed: {str(e)}")
